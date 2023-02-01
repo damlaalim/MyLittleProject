@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 namespace _Game.Scripts.Controller
 {
@@ -16,23 +17,29 @@ namespace _Game.Scripts.Controller
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
+            
+            StartCoroutine(CameraMoveRoutine());
         }
 
-        private void Update()
+        private IEnumerator CameraMoveRoutine()
         {
-            // Rotate orientation
-            var viewDir = player.position - new Vector3(transform.position.x, player.position.y, transform.position.z);
-            orientation.forward = viewDir.normalized;
+            while (true)
+            {
+                // Rotate orientation
+                var viewDir = player.position - new Vector3(transform.position.x, player.position.y, transform.position.z);
+                orientation.forward = viewDir.normalized;
             
-            // Rotate player object
-            var horizontalInput = Input.GetAxis("Horizontal");
-            var verticalInput = Input.GetAxis("Vertical");
-            var inputDir = orientation.forward * verticalInput + orientation.right * horizontalInput;
+                // Rotate player object
+                var horizontalInput = Input.GetAxis("Horizontal");
+                var verticalInput = Input.GetAxis("Vertical");
+                var inputDir = orientation.forward * verticalInput + orientation.right * horizontalInput;
+        
+                if (inputDir != Vector3.zero)
+                    playerObj.forward =
+                        Vector3.Slerp(playerObj.forward, inputDir.normalized, Time.deltaTime * rotationSpeed);
 
-            if (inputDir != Vector3.zero)
-                playerObj.forward =
-                    Vector3.Slerp(playerObj.forward, inputDir.normalized, Time.deltaTime * rotationSpeed);
-
+                yield return 0;
+            }
         }
     }
 }
